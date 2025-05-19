@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}Register for {{ event.event_name }}{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="card shadow">
+        <div class="card-header text-center">
+            <h1 class="h3 mb-0"><i class="fas fa-ticket-alt me-2"></i>Register for Event</h1>
+        </div>
+        <div class="card-body">
+            <div class="event-header-section text-center mb-5">
+                <h2 class="event-title">{{ event.event_name }}</h2>
+                <span class="badge bg-info event-badge">{{ event.event_type }}</span>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="event-info-card mb-5">
+                        <div class="event-info-item">
+                            <i class="fas fa-calendar-alt info-icon"></i>
+                            <div>
+                                <strong>Date:</strong><br>
+                                {{ event.start_time|date:"F d, Y" }} at {{ event.start_time|time:"g:i A" }}
+                            </div>
+                        </div>
+                        
+                        <div class="event-info-item">
+                            <i class="fas fa-map-marker-alt info-icon"></i>
+                            <div>
+                                <strong>Location:</strong><br>
+                                {{ event.event_location }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="section-container mb-5">
+                            <h4 class="section-title"><i class="fas fa-tag me-2"></i>Select Ticket Type</h4>
+                            <div class="ticket-options">
+                                {% for option in ticket_options %}
+                                <div class="ticket-option-card">
+                                    <input class="form-check-input" type="radio" name="ticket_type" id="ticket_{{ forloop.counter }}" value="{{ option.type }}" {% if forloop.first %}checked{% endif %}>
+                                    <label class="form-check-label" for="ticket_{{ forloop.counter }}">
+                                        {% if option.type == 'VIP' %}
+                                            <span class="ticket-badge vip">{{ option.type }}</span>
+                                        {% elif option.type == 'Premium' %}
+                                            <span class="ticket-badge premium">{{ option.type }}</span>
+                                        {% else %}
+                                            <span class="ticket-badge standard">{{ option.type }}</span>
+                                        {% endif %}
+                                        <span class="ticket-price">${{ option.price }}</span>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="section-container mb-5">
+                            <h4 class="section-title"><i class="fas fa-address-card me-2"></i>Contact Information</h4>
+                            <div class="contact-form">
+                                <label for="phone" class="form-label">Phone Number (optional):</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                        </div>
+                        
+                        <div class="order-summary mb-5">
+                            <div class="order-summary-header">
+                                <h4 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h4>
+                            </div>
+                            <div class="order-summary-body">
+                                <div class="order-item">
+                                    <span>Ticket:</span>
+                                    <span id="ticket_name">{{ ticket_options.0.type }}</span>
+                                </div>
+                                <div class="order-total">
+                                    <span>Total:</span>
+                                    <span>${{ ticket_options.0.price }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn-register">
+                                <i class="fas fa-shopping-cart me-2"></i>Complete Registration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="event-details-sidebar">
+                        <div class="sidebar-header">
+                            <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Event Details</h4>
+                        </div>
+                        <div class="sidebar-body">
+                            <p class="event-description">{{ event.event_description|truncatewords:50 }}</p>
+                            <div class="capacity-info">
+                                <i class="fas fa-users capacity-icon"></i>
+                                <div>
+                                    <strong>Capacity:</strong><br>
+                                    {{ event.max_capacity }} attendees
+                                </div>
+                            </div>
+                            <div class="back-link">
+                                <a href="{% url 'event_detail' event.event_id %}" class="btn-back">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Event
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Main container with pattern background */
+.register-container {
+    padding: 40px 20px;
+    background-color: #f5f8fa;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2393c5fd' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Card styling */
+.card {
+    max-width: 1100px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,123,255,0.1) !important;
+    border: none;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 25px;
+    border-bottom: none;
+}
+
+.card-body {
+    padding: 40px;
+}
+
+/* Event header */
+.event-header-section {
+    position: relative;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.event-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.event-badge {
+    font-size: 14px;
+    padding: 8px 15px;
+    border-radius: 30px;
+}
+
+/* Info cards */
+.event-info-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.event-info-item {
+    display: flex;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 200px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.info-icon {
+    font-size: 24px;
+    color: #007bff;
+    margin-right: 15px;
+    margin-top: 5px;
+}
+
+/* Section containers */
+.section-container {
+    padding: 25px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Ticket options */
+.ticket-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ticket-option-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.ticket-option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.ticket-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+.vip {
+    background-color: #dc3545;
+}
+
+.premium {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.standard {
+    background-color: #28a745;
+}
+
+.ticket-price {
+    font-weight: 700;
+    font-size: 18px;
+    color: #495057;
+}
+
+/* Order summary */
+.order-summary {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.order-summary-header {
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.order-summary-body {
+    padding: 20px;
+    background-color: white;
+}
+
+.order-item, .order-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.order-total {
+    margin-top: 10px;
+    border-top: 1px solid #e9ecef;
+    padding-top: 15px;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+/* Register button */
+.btn-register {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,123,255,0.2);
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0,123,255,0.3);
+}
+
+/* Sidebar */
+.event-details-sidebar {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    height: 100%;
+}
+
+.sidebar-header {
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar-body {
+    padding: 20px;
+    background-color: white;
+}
+
+.event-description {
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.capacity-info {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.capacity-icon {
+    font-size: 24px;
+    color: #007bff;
+    margin-right: 15px;
+    margin-top: 5px;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-back {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e9ecef;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background-color: #e9ecef;
+}
+
+/* Spacing helper classes */
+.me-2 {
+    margin-right: 8px;
+}
+
+/* Make it responsive */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 20px;
+    }
+    
+    .event-info-card {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">
+            <h3><i class="fas fa-user"></i> User Panel</h3>
+        </div>
+        
+        <div class="user-info">
+            <img src="{{ user.profile_image|default:'/static/images/default-avatar.png' }}" alt="User" class="user-avatar">
+            <div>
+                <h4>{{ request.user.username }}</h4>
+            </div>
+        </div>
+        
+        <ul class="nav-menu">
+            <li><a href="{% url 'user_dashboard' %}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="{% url 'event_list' %}"><i class="fas fa-calendar-alt"></i> Browse Events</a></li>
+            <li><a href="#my-tickets"><i class="fas fa-ticket-alt"></i> My Tickets</a></li>
+        </ul>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-header">
+            <div class="search-box">
+                <form method="GET" action="{% url 'user_dashboard' %}">
+                    <input type="text" name="search" placeholder="Search events" value="{{ search_query }}">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            <div class="icon-group">
+                <a href="#"><i class="fas fa-bell"></i></a>
+                <a href="#"><i class="fas fa-user"></i></a>
+                
+                {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="display:inline-block;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm ml-2">Log Out</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <div class="breadcrumb">
+                    <a href="#">Home</a> / Dashboard
+                </div>
+            </div>
+            
+            <!-- Event Boxes -->
+            <div class="event-boxes">
+                <div class="stat-box teal">
+                    <div class="stat-number">{{ events|length }}</div>
+                    <div class="stat-text">Available Events</div>
+                    <a href="{% url 'event_list' %}" class="more-info">View All <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+                
+                <div class="stat-box yellow">
+                    <div class="stat-number">{{ user_tickets|length }}</div>
+                    <div class="stat-text">My Tickets</div>
+                    <a href="#my-tickets" class="more-info">View All <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            
+            <!-- Available Events -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Available Events</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for event in events %}
+                        <div class="col-md-4 mb-4">
+                            <div class="event-card">
+                                <h4>{{ event.event_name }}</h4>
+                                <p class="text-muted">{{ event.event_type }}</p>
+                                <p>{{ event.event_description|truncatechars:100 }}</p>
+                                <p><strong>Date:</strong> {{ event.start_time|date:"M d, Y" }}</p>
+                                <p><strong>Location:</strong> {{ event.event_location }}</p>
+                                <div class="event-actions">
+                                    <a href="{% url 'event_detail' event.event_id %}" class="action-btn view-btn"><i class="fas fa-eye"></i></a>
+                                    <a href="{% url 'register_event' event.event_id %}" class="btn btn-danger">
+                                        <i class="fas fa-ticket-alt me-1"></i>Register
+                                    </a>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="alert alert-info">No events found.</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- My Tickets -->
+            <div class="card" id="my-tickets">
+                <div class="card-header">
+                    <h3>My Tickets</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Ticket Type</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in user_tickets %}
+                            <tr>
+                                <td>{{ ticket.event.event_name }}</td>
+                                <td>{{ ticket.event.start_time|date:"M d, Y" }}</td>
+                                <td>{{ ticket.event.event_location }}</td>
+                                <td>
+                                    {% if ticket.ticket_type == 'VIP' %}
+                                        <span class="badge badge-danger">{{ ticket.ticket_type }}</span>
+                                    {% elif ticket.ticket_type == 'Premium' %}
+                                        <span class="badge badge-warning">{{ ticket.ticket_type }}</span>
+                                    {% else %}
+                                        <span class="badge badge-success">{{ ticket.ticket_type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-success">${{ ticket.price }}</td>
+                                <td>
+                                    <a href="{% url 'ticket_detail' ticket.ticket_id %}" class="action-btn view-btn"><i class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">You haven't registered for any events yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>Copyright © 2025 Event Management System. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+/* Dashboard styling */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 250px;
+    background-color: #343a40;
+    color: white;
+    min-height: 100vh;
+}
+
+.brand {
+    padding: 15px;
+    background-color: #212529;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-menu li a {
+    display: block;
+    padding: 12px 15px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.nav-menu li a:hover, .nav-menu li a.active {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.nav-menu li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Main content */
+.main-content {
+    flex: 1;
+}
+
+/* Top header */
+.top-header {
+    background-color: #007bff;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.search-box {
+    display: flex;
+    width: 300px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 4px 0 0 4px;
+}
+
+.search-box button {
+    background-color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 0 4px 4px 0;
+}
+
+.icon-group a {
+    color: white;
+    margin-left: 15px;
+    font-size: 18px;
+}
+
+/* Dashboard content */
+.dashboard-content {
+    padding: 20px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.breadcrumb {
+    color: #6c757d;
+}
+
+.breadcrumb a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+/* Event boxes */
+.event-boxes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    padding: 20px;
+    border-radius: 4px;
+    color: white;
+    position: relative;
+}
+
+.stat-box.teal { background-color: #20c997; }
+.stat-box.yellow { background-color: #ffc107; }
+
+.stat-number {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.stat-text {
+    margin-top: 5px;
+}
+
+.more-info {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.1);
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+}
+
+/* Event cards */
+.event-card {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 15px;
+    height: 100%;
+}
+
+.event-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+/* Card and table */
+.card {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: white;
+}
+
+.badge-success { background-color: #28a745; }
+.badge-warning { background-color: #ffc107; }
+.badge-danger { background-color: #dc3545; }
+
+/* Action buttons */
+.action-btn {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    text-align: center;
+    line-height: 36px;
+    border-radius: 4px;
+    color: white;
+    margin-right: 5px;
+}
+
+.view-btn { background-color: #17a2b8; }
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 15px 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+    .event-boxes {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+}
+</style>
+{% endblock %}

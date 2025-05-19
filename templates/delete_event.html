@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Event{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <div class="delete-header">
+            <h1 class="h3 mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete Event</h1>
+        </div>
+        <div class="delete-body">
+            <div class="warning-icon">
+                <i class="fas fa-trash"></i>
+            </div>
+            
+            <p class="delete-message">Are you sure you want to delete "<strong>{{ event.event_name }}</strong>"?</p>
+            <p class="delete-warning">This action cannot be undone.</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="action-buttons">
+                    <a href="{% url 'event_detail' event.event_id %}" class="btn-cancel">
+                        <i class="fas fa-arrow-left me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn-delete">
+                        <i class="fas fa-trash me-2"></i>Delete Event
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.delete-container {
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.delete-card {
+    width: 100%;
+    max-width: 500px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.delete-header {
+    background-color: #dc3545;
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+}
+
+.delete-body {
+    padding: 30px;
+    text-align: center;
+}
+
+.warning-icon {
+    font-size: 60px;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.delete-message {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.delete-warning {
+    color: #6c757d;
+    margin-bottom: 25px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-cancel, .btn-delete {
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.me-2 {
+    margin-right: 8px;
+}
+</style>
+{% endblock %}

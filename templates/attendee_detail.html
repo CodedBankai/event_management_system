@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Attendee Details{% endblock %}
+
+{% block content %}
+<div class="attendee-container">
+    <div class="card shadow">
+        <div class="card-header">
+            <h1 class="h3 mb-0"><i class="fas fa-user-circle me-2"></i>Attendee Details</h1>
+        </div>
+        <div class="card-body">
+            <div class="attendee-profile">
+                <div class="profile-info">
+                    <h3 class="section-title">Contact Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-envelope info-icon"></i>
+                            <div>
+                                <strong>Email:</strong>
+                                <div>{{ attendee.email }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-phone info-icon"></i>
+                            <div>
+                                <strong>Phone:</strong>
+                                <div>{{ attendee.phone_number }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt info-icon"></i>
+                            <div>
+                                <strong>Registration Date:</strong>
+                                <div>{{ attendee.registration_date|date:"M d, Y" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tickets-section">
+                <h3 class="section-title"><i class="fas fa-ticket-alt me-2"></i>Tickets</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Date</th>
+                                <th>Ticket Type</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in tickets %}
+                            <tr>
+                                <td><strong>{{ ticket.event.event_name }}</strong></td>
+                                <td><span class="date-badge">{{ ticket.event.start_time|date:"M d, Y" }}</span></td>
+                                <td>
+                                    {% if ticket.ticket_type == 'VIP' %}
+                                        <span class="status-badge vip">{{ ticket.ticket_type }}</span>
+                                    {% elif ticket.ticket_type == 'Premium' %}
+                                        <span class="status-badge premium">{{ ticket.ticket_type }}</span>
+                                    {% else %}
+                                        <span class="status-badge standard">{{ ticket.ticket_type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="price">${{ ticket.price }}</td>
+                                <td>
+                                    <a href="{% url 'ticket_detail' ticket.ticket_id %}" class="action-btn view-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">This attendee hasn't registered for any events yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Attendee Details Styling */
+.attendee-container {
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.card {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    padding: 15px 20px;
+    background-color: #007bff;
+    color: white;
+    border-bottom: 1px solid #eee;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.section-title {
+    color: #495057;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.info-icon {
+    color: #007bff;
+    font-size: 20px;
+    margin-right: 10px;
+    margin-top: 3px;
+}
+
+.tickets-section {
+    margin-top: 30px;
+}
+
+.table-container {
+    background-color: white;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.date-badge {
+    background-color: #17a2b8;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+}
+
+.vip {
+    background-color: #dc3545;
+}
+
+.premium {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.standard {
+    background-color: #28a745;
+}
+
+.price {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.action-btn {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    text-align: center;
+    line-height: 36px;
+    border-radius: 4px;
+    color: white;
+}
+
+.view-btn {
+    background-color: #17a2b8;
+}
+
+.me-2 {
+    margin-right: 8px;
+}
+</style>
+{% endblock %}
+
