@@ -156,13 +156,13 @@ http://127.0.0.1:8000/
 
 ## 📸 Screenshots
 
-| Home | Dashboard |
+| Home Page | Admin Dashboard |
 |------|-----------|
-| Add Screenshot | Add Screenshot |
+| ![Home](screenshots/home.png) | ![Dashboard](screenshots/dashboard.png) |
 
-| Event Details | Registration |
+| Create Event | Login / Register |
 |--------------|--------------|
-| Add Screenshot | Add Screenshot |
+| ![Create Event](screenshots/create_event.png) | ![Login](screenshots/login.png) |
 
 ---
 
