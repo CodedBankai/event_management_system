@@ -15,13 +15,13 @@ The Event Management System (EMS) is designed to provide a centralized platform 
 ### 👨‍💼 Admin
 - Dashboard with event statistics
 - Create, update, and delete events
-- Manage attendees
+- View and manage registered users (Recent User Registrations)
 - Configure ticket types and pricing
 - Track registrations
 
 ### 👤 User
 - Browse available events
-- Register for events
+- Register for events (with automated capacity limits)
 - View registered events
 - Manage tickets
 - Personal dashboard
@@ -49,18 +49,30 @@ The application follows Django's **MVT (Model-View-Template)** architecture.
 
 ---
 
+## 🔄 Project Pipeline (Request Lifecycle)
+
+1. **User Request**: A user interacts with the UI (e.g., clicks "Register", logs in, or clicks "Create Event").
+2. **URL Routing**: The `urls.py` files intercept the request and map it to the appropriate view function.
+3. **Security & Logic**: The view checks authentication (`@login_required`), authorization (e.g., `is_staff`), and business constraints (e.g., verifying an event hasn't reached `max_capacity`).
+4. **Database Operations**: The view queries or updates the MySQL database securely via Django Models and Form validation.
+5. **Template Rendering**: The view prepares the context data and renders the final HTML templates (using modern typography and Bootstrap) to return to the user's browser.
+
+---
+
 ## 📂 Project Structure
 
 ```
-EventManagementSystem/
-│── event_management/
-│── events/
-│── users/
+event_management_system/
+│── event_management_system/ (Project Settings)
+│── events/ (Event App)
+│── users/ (User App)
 │── templates/
 │── static/
 │── media/
 │── manage.py
 │── requirements.txt
+│── .env
+│── .gitignore
 └── README.md
 ```
 
@@ -71,8 +83,8 @@ EventManagementSystem/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/event-management-system.git
-cd event-management-system
+git clone https://github.com/CodedBankai/event_management_system.git
+cd event_management_system
 ```
 
 ### 2. Create a virtual environment
@@ -101,12 +113,18 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure Database
+### 4. Configure Environment & Database
 
-Update your MySQL database settings inside:
+Create a `.env` file in the root directory (alongside `manage.py`) and add your database and secret credentials:
 
-```
-settings.py
+```ini
+SECRET_KEY=your_django_secret_key
+DEBUG=True
+DB_NAME=eventmanagement
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_HOST=localhost
+DB_PORT=3306
 ```
 
 Then run:
@@ -156,6 +174,7 @@ http://127.0.0.1:8000/
 - CSRF Protection
 - Input Validation
 - Secure Authorization
+- **Environment Variables for Secrets Management** (using `python-dotenv`)
 
 ---
 
