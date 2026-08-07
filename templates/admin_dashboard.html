@@ -63,6 +63,16 @@
                 </div>
             </div>
             
+            {% if messages %}
+            <div class="messages mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+                    <i class="fas fa-info-circle me-2"></i>{{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
             <!-- Stat Boxes -->
             <div class="stat-boxes">
                 <div class="stat-box teal">
@@ -90,7 +100,6 @@
                 </div>
             </div>
             
-            <!-- Event List -->
             <div class="card">
                 <div class="card-header">
                     <h3>Event List</h3>
@@ -136,6 +145,41 @@
                             {% empty %}
                             <tr>
                                 <td colspan="8" class="text-center">No events found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- User Registrations List -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Recent User Registrations</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Registration Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in recent_users %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ u.first_name }} {{ u.last_name }}</td>
+                                <td>{{ u.email }}</td>
+                                <td>{{ u.phone_number|default:"-" }}</td>
+                                <td>{{ u.registration_date|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No user registrations found.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -382,6 +426,33 @@
     padding: 15px 0;
     color: #6c757d;
     font-size: 14px;
+}
+.alert {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-danger, .alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
 }
 </style>
 {% endblock %}

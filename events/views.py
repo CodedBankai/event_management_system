@@ -22,12 +22,15 @@ def admin_dashboard(request):
     user_registrations_count = Attendee.objects.count()
     complete_events_count = Event.objects.filter(status='Completed').count()
 
+    recent_users = Attendee.objects.order_by('-registration_date')[:10]
+
     context = {
         'events': events,
         'event_category_count': event_category_count,
         'events_count': events_count,
         'user_registrations_count': user_registrations_count,
         'complete_events_count': complete_events_count,
+        'recent_users': recent_users,
     }
     return render(request, 'admin_dashboard.html', context)
 

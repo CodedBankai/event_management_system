@@ -11,9 +11,11 @@
         
         <div class="login-body">
             {% if messages %}
-            <div class="alert alert-danger">
+            <div class="messages">
                 {% for message in messages %}
-                    {{ message }}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+                    <i class="fas fa-info-circle me-2"></i>{{ message }}
+                </div>
                 {% endfor %}
             </div>
             {% endif %}
@@ -91,9 +93,24 @@
     padding: 12px 15px;
     margin-bottom: 20px;
     border-radius: 4px;
+}
+
+.alert-danger, .alert-error {
     color: #721c24;
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
 }
 
 .form-group {
