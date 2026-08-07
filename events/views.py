@@ -22,15 +22,12 @@ def admin_dashboard(request):
     user_registrations_count = Attendee.objects.count()
     complete_events_count = Event.objects.filter(status='Completed').count()
 
-    recent_users = Attendee.objects.order_by('-registration_date')[:10]
-
     context = {
         'events': events,
         'event_category_count': event_category_count,
         'events_count': events_count,
         'user_registrations_count': user_registrations_count,
         'complete_events_count': complete_events_count,
-        'recent_users': recent_users,
     }
     return render(request, 'admin_dashboard.html', context)
 
@@ -181,3 +178,17 @@ def edit_event(request, event_id):
 def ticket_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, ticket_id=ticket_id)
     return render(request, 'ticket_detail.html', {'ticket': ticket})
+
+
+@login_required
+def user_registrations_list(request):
+    if not request.user.is_staff:
+        return render(request, '403.html', status=403)
+        
+    attendees = Attendee.objects.exclude(user__is_staff=True).order_by('-registration_date')
+    count = attendees.count()
+    
+    return render(request, 'user_registrations_list.html', {
+        'attendees': attendees,
+        'count': count
+    })

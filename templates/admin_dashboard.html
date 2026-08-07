@@ -90,7 +90,7 @@
                 <div class="stat-box yellow">
                     <div class="stat-number">{{ user_registrations_count }}</div>
                     <div class="stat-text">User Registrations</div>
-                    <a href="#" class="more-info">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{% url 'user_registrations_list' %}" class="more-info">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
                 
                 <div class="stat-box red">
@@ -145,41 +145,6 @@
                             {% empty %}
                             <tr>
                                 <td colspan="8" class="text-center">No events found.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- User Registrations List -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Recent User Registrations</h3>
-                </div>
-                <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Registration Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in recent_users %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ u.first_name }} {{ u.last_name }}</td>
-                                <td>{{ u.email }}</td>
-                                <td>{{ u.phone_number|default:"-" }}</td>
-                                <td>{{ u.registration_date|date:"M d, Y H:i" }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center">No user registrations found.</td>
                             </tr>
                             {% endfor %}
                         </tbody>

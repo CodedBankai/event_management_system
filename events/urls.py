@@ -10,8 +10,7 @@ urlpatterns = [
     path('events/<int:event_id>/delete/', views.delete_event, name='delete_event'),  # Fixed incorrect format
     # Add this line to your urlpatterns list
     path('events/<int:event_id>/edit/', views.edit_event, name='edit_event'),
-   # Add this line to your urlpatterns list
     path('tickets/<int:ticket_id>/', views.ticket_detail, name='ticket_detail'),
-
+    path('admin-dashboard/users/', views.user_registrations_list, name='user_registrations_list'),
 ]
 
