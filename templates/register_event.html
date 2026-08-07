@@ -34,59 +34,66 @@
                         </div>
                     </div>
                     
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="section-container mb-5">
-                            <h4 class="section-title"><i class="fas fa-tag me-2"></i>Select Ticket Type</h4>
-                            <div class="ticket-options">
-                                {% for option in ticket_options %}
-                                <div class="ticket-option-card">
-                                    <input class="form-check-input" type="radio" name="ticket_type" id="ticket_{{ forloop.counter }}" value="{{ option.type }}" {% if forloop.first %}checked{% endif %}>
-                                    <label class="form-check-label" for="ticket_{{ forloop.counter }}">
-                                        {% if option.type == 'VIP' %}
-                                            <span class="ticket-badge vip">{{ option.type }}</span>
-                                        {% elif option.type == 'Premium' %}
-                                            <span class="ticket-badge premium">{{ option.type }}</span>
-                                        {% else %}
-                                            <span class="ticket-badge standard">{{ option.type }}</span>
-                                        {% endif %}
-                                        <span class="ticket-price">${{ option.price }}</span>
-                                    </label>
-                                </div>
-                                {% endfor %}
-                            </div>
+                    {% if is_full %}
+                        <div class="alert alert-danger text-center p-4">
+                            <h4><i class="fas fa-exclamation-circle me-2"></i>This event is full</h4>
+                            <p>We welcome you next time!</p>
                         </div>
-                        
-                        <div class="section-container mb-5">
-                            <h4 class="section-title"><i class="fas fa-address-card me-2"></i>Contact Information</h4>
-                            <div class="contact-form">
-                                <label for="phone" class="form-label">Phone Number (optional):</label>
-                                <input type="tel" class="form-control" id="phone" name="phone">
-                            </div>
-                        </div>
-                        
-                        <div class="order-summary mb-5">
-                            <div class="order-summary-header">
-                                <h4 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h4>
-                            </div>
-                            <div class="order-summary-body">
-                                <div class="order-item">
-                                    <span>Ticket:</span>
-                                    <span id="ticket_name">{{ ticket_options.0.type }}</span>
-                                </div>
-                                <div class="order-total">
-                                    <span>Total:</span>
-                                    <span>${{ ticket_options.0.price }}</span>
+                    {% else %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="section-container mb-5">
+                                <h4 class="section-title"><i class="fas fa-tag me-2"></i>Select Ticket Type</h4>
+                                <div class="ticket-options">
+                                    {% for option in ticket_options %}
+                                    <div class="ticket-option-card">
+                                        <input class="form-check-input" type="radio" name="ticket_type" id="ticket_{{ forloop.counter }}" value="{{ option.type }}" {% if forloop.first %}checked{% endif %}>
+                                        <label class="form-check-label" for="ticket_{{ forloop.counter }}">
+                                            {% if option.type == 'VIP' %}
+                                                <span class="ticket-badge vip">{{ option.type }}</span>
+                                            {% elif option.type == 'Premium' %}
+                                                <span class="ticket-badge premium">{{ option.type }}</span>
+                                            {% else %}
+                                                <span class="ticket-badge standard">{{ option.type }}</span>
+                                            {% endif %}
+                                            <span class="ticket-price">${{ option.price }}</span>
+                                        </label>
+                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="text-center">
-                            <button type="submit" class="btn-register">
-                                <i class="fas fa-shopping-cart me-2"></i>Complete Registration
-                            </button>
-                        </div>
-                    </form>
+                            
+                            <div class="section-container mb-5">
+                                <h4 class="section-title"><i class="fas fa-address-card me-2"></i>Contact Information</h4>
+                                <div class="contact-form">
+                                    <label for="phone" class="form-label">Phone Number (optional):</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone">
+                                </div>
+                            </div>
+                            
+                            <div class="order-summary mb-5">
+                                <div class="order-summary-header">
+                                    <h4 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h4>
+                                </div>
+                                <div class="order-summary-body">
+                                    <div class="order-item">
+                                        <span>Ticket:</span>
+                                        <span id="ticket_name">{{ ticket_options.0.type }}</span>
+                                    </div>
+                                    <div class="order-total">
+                                        <span>Total:</span>
+                                        <span>${{ ticket_options.0.price }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn-register">
+                                    <i class="fas fa-shopping-cart me-2"></i>Complete Registration
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
                 </div>
                 
                 <div class="col-md-4">

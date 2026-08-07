@@ -41,16 +41,15 @@ def user_dashboard(request):
     user_tickets = []
     
     try:
-        # Try to get the attendee record first
-        attendee = Attendee.objects.get(email=request.user.email)
-        
-        # If found, get their tickets
-        user_tickets = Ticket.objects.filter(attendee=attendee)
-        
-        # Ensure the attendee is linked to this user
-        if not attendee.user:
-            attendee.user = request.user
-            attendee.save()
+        if hasattr(request.user, 'attendee') and request.user.attendee:
+            attendee = request.user.attendee
+            user_tickets = Ticket.objects.filter(attendee=attendee)
+        elif request.user.email:
+            attendee = Attendee.objects.get(email=request.user.email)
+            user_tickets = Ticket.objects.filter(attendee=attendee)
+            if not attendee.user:
+                attendee.user = request.user
+                attendee.save()
     except Attendee.DoesNotExist:
         # No tickets yet
         pass
@@ -94,32 +93,6 @@ def login_view(request):
     return render(request, 'login.html')
 
 
-@login_required
-def admin_dashboard(request):
-    # Security check - only staff users can access
-    if not request.user.is_staff:
-        messages.error(request, "You don't have permission to access the admin dashboard.")
-        return redirect('user_dashboard')
-    
-    # Get all events
-    events = Event.objects.all()
-    
-    # Get all tickets
-    tickets = Ticket.objects.all()
-    
-    # Get all attendees
-    attendees = Attendee.objects.all()
-    
-    context = {
-        'events': events,
-        'tickets': tickets,
-        'attendees': attendees,
-        'total_events': events.count(),
-        'total_tickets': tickets.count(),
-        'total_attendees': attendees.count(),
-    }
-    
-    return render(request, 'admin_dashboard.html', context)
 def attendee_detail(request, attendee_id):
     attendee = get_object_or_404(Attendee, attendee_id=attendee_id)
     # Optionally, get tickets for this attendee

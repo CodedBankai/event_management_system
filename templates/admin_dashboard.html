@@ -2,6 +2,8 @@
 
 {% block title %}Admin Dashboard | Event Management System{% endblock %}
 
+{% block header %}{% endblock %}
+
 {% block content %}
 <div class="dashboard-container">
     <!-- Sidebar -->
@@ -64,25 +66,25 @@
             <!-- Stat Boxes -->
             <div class="stat-boxes">
                 <div class="stat-box teal">
-                    <div class="stat-number">2</div>
+                    <div class="stat-number">{{ event_category_count }}</div>
                     <div class="stat-text">Event Category</div>
                     <a href="#" class="more-info">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
                 
                 <div class="stat-box green">
-                    <div class="stat-number">3</div>
+                    <div class="stat-number">{{ events_count }}</div>
                     <div class="stat-text">Events</div>
                     <a href="#" class="more-info">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
                 
                 <div class="stat-box yellow">
-                    <div class="stat-number">6</div>
+                    <div class="stat-number">{{ user_registrations_count }}</div>
                     <div class="stat-text">User Registrations</div>
                     <a href="#" class="more-info">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
                 
                 <div class="stat-box red">
-                    <div class="stat-number">1</div>
+                    <div class="stat-number">{{ complete_events_count }}</div>
                     <div class="stat-text">Complete Event</div>
                     <a href="#" class="more-info">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
@@ -126,9 +128,9 @@
                                     {% endif %}
                                 </td>
                                 <td class="action-buttons">
-                                    <a href="/events/{{ event.event_id }}/" class="action-btn view-btn"><i class="fas fa-eye"></i></a>
-                                    <a href="/events/{{ event.event_id }}/edit/" class="action-btn edit-btn"><i class="fas fa-edit"></i></a>
-                                    <a href="/events/{{ event.event_id }}/delete/" class="action-btn delete-btn"><i class="fas fa-trash"></i></a>
+                                    <a href="{% url 'event_detail' event.event_id %}" class="action-btn view-btn"><i class="fas fa-eye"></i></a>
+                                    <a href="{% url 'edit_event' event.event_id %}" class="action-btn edit-btn"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'delete_event' event.event_id %}" class="action-btn delete-btn"><i class="fas fa-trash"></i></a>
                                 </td>
                             </tr>
                             {% empty %}

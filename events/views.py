@@ -1,12 +1,9 @@
-from django.shortcuts import render
-from .models import Event, Ticket, Attendee
-from django.shortcuts import render
-from .models import Event
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import render, get_object_or_404
-from users.models import Attendee  # Assuming Attendee is in your users app
+from .models import Event, Ticket
+from .forms import EventForm
+from users.models import Attendee
 
 
 def event_list(request):
@@ -16,23 +13,29 @@ def event_list(request):
 
 def admin_dashboard(request):
     if not request.user.is_staff:  # Ensure only admin users can access this view
-        return render(request, '403.html')  # Render a "403 Forbidden" page if not admin
-    
+        return render(request, '403.html', status=403)
+
     events = Event.objects.all()
-    tickets = Ticket.objects.select_related('event', 'attendee')
-    attendees = Attendee.objects.all()
     
+    event_category_count = Event.objects.values('event_type').distinct().count()
+    events_count = Event.objects.count()
+    user_registrations_count = Attendee.objects.count()
+    complete_events_count = Event.objects.filter(status='Completed').count()
+
     context = {
         'events': events,
-        'tickets': tickets,
-        'attendees': attendees,
+        'event_category_count': event_category_count,
+        'events_count': events_count,
+        'user_registrations_count': user_registrations_count,
+        'complete_events_count': complete_events_count,
     }
     return render(request, 'admin_dashboard.html', context)
 
+
 def user_dashboard(request):
     if request.user.is_staff:  # Prevent admin users from accessing this view
-        return render(request, '403.html')  # Render a "403 Forbidden" page if admin
-    
+        return render(request, '403.html', status=403)
+
     events = Event.objects.all()  # Fetch all events for browsing
     context = {
         'events': events,
@@ -45,140 +48,133 @@ def event_detail(request, event_id):
     return render(request, 'event_detail.html', {'event': event})
 
 
-# If your Attendee model is in a different app, adjust the import
+TICKET_OPTIONS = [
+    {'type': 'Standard', 'price': 49.99},
+    {'type': 'Premium', 'price': 99.99},
+    {'type': 'VIP', 'price': 149.99},
+]
+
 
 @login_required
 def register_event(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
-    
-    # Define ticket options
-    ticket_options = [
-        {'type': 'Standard', 'price': 49.99},
-        {'type': 'Premium', 'price': 99.99},
-        {'type': 'VIP', 'price': 149.99}
-    ]
+    event = get_object_or_404(Event, event_id=event_id)
+
     if request.method == 'POST':
+        # Check capacity limit before processing registration
+        current_tickets = Ticket.objects.filter(event=event).count()
+        if event.max_capacity is not None and current_tickets >= event.max_capacity:
+            messages.error(request, "This event is full. We welcome you next time!")
+            return redirect('user_dashboard')
+
         ticket_type = request.POST.get('ticket_type')
-        
-        # Find the price for this ticket type
-        price = 0
-        for option in ticket_options:
+
+        price = None
+        for option in TICKET_OPTIONS:
             if option['type'] == ticket_type:
                 price = option['price']
                 break
-        
-        # IMPROVED: Get or create attendee record with explicit user link
+
+        if price is None:
+            messages.error(request, "Please select a valid ticket type.")
+            return render(request, 'register_event.html', {
+                'event': event,
+                'ticket_options': TICKET_OPTIONS,
+            })
+
+        # Get or create attendee record with explicit user link
         try:
-            attendee = Attendee.objects.get(email=request.user.email)
-            # Update user link if missing
-            if not attendee.user:
-                attendee.user = request.user
-                attendee.save()
+            if hasattr(request.user, 'attendee') and request.user.attendee:
+                attendee = request.user.attendee
+            elif request.user.email:
+                attendee = Attendee.objects.get(email=request.user.email)
+                if not attendee.user:
+                    attendee.user = request.user
+                    attendee.save()
+            else:
+                raise Attendee.DoesNotExist
         except Attendee.DoesNotExist:
-            # Create new attendee
+            email_to_use = request.user.email
+            if not email_to_use:
+                email_to_use = f"user_{request.user.id}@example.com"
             attendee = Attendee.objects.create(
                 user=request.user,
-                email=request.user.email,
+                email=email_to_use,
                 first_name=request.user.first_name or request.user.username,
                 last_name=request.user.last_name or ''
             )
-        
-        # Create the ticket
-        ticket = Ticket.objects.create(
+
+        Ticket.objects.create(
             event=event,
             attendee=attendee,
             ticket_type=ticket_type,
             price=price
         )
-        print(f"Created ticket: {ticket.pk} for user {request.user.username}")
-        
+
         messages.success(request, f"Successfully registered for {event.event_name}!")
-        return redirect('user_dashboard')  # Adjust if your dashboard URL name is different
-    
+        return redirect('user_dashboard')
+
+    current_tickets = Ticket.objects.filter(event=event).count()
+    is_full = False
+    if event.max_capacity is not None and current_tickets >= event.max_capacity:
+        is_full = True
+
     context = {
         'event': event,
-        'ticket_options': ticket_options
+        'ticket_options': TICKET_OPTIONS,
+        'is_full': is_full,
     }
-    
+
     return render(request, 'register_event.html', context)
+
+
 @login_required
 def create_event(request):
     if request.method == 'POST':
-        # Process form submission
-        event_name = request.POST.get('event_name')
-        event_type = request.POST.get('event_type')
-        event_description = request.POST.get('event_description')
-        event_location = request.POST.get('event_location')
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
-        max_capacity = request.POST.get('max_capacity')
-        
-        # Create new event
-        Event.objects.create(
-            event_name=event_name,
-            event_type=event_type,
-            event_description=event_description,
-            event_location=event_location,
-            start_time=start_time,
-            end_time=end_time,
-            max_capacity=max_capacity,
-            status='Upcoming'
-        )
-        
-        messages.success(request, "Event created successfully!")
-        return redirect('admin_dashboard')
-    
-    # Display empty form
-    return render(request, 'create_event.html')
+        form = EventForm(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.status = 'Upcoming'
+            event.save()
+            messages.success(request, "Event created successfully!")
+            return redirect('admin_dashboard')
+        messages.error(request, "Please correct the errors below.")
+    else:
+        form = EventForm()
+
+    return render(request, 'create_event.html', {'form': form})
+
 
 @login_required
 def delete_event(request, event_id):
-    # Get the event or return 404 if not found
     event = get_object_or_404(Event, event_id=event_id)
-    
-    # Security check - only staff should delete events
+
     if not request.user.is_staff:
         messages.error(request, "You don't have permission to delete events.")
         return redirect('event_list')
-    
+
     if request.method == 'POST':
-        # Delete the event and redirect to admin dashboard
         event.delete()
         messages.success(request, f"Event '{event.event_name}' has been deleted.")
         return redirect('admin_dashboard')
-    
-    # Show confirmation page
+
     return render(request, 'delete_event.html', {'event': event})
 
-# events/views.py
+
 def edit_event(request, event_id):
     event = get_object_or_404(Event, event_id=event_id)
     if request.method == 'POST':
-        # Extract form data
-        event.event_name = request.POST.get('event_name')
-        event.event_type = request.POST.get('event_type')
-        event.event_description = request.POST.get('event_description')
-        event.event_location = request.POST.get('event_location')
-        event.start_time = request.POST.get('start_time')
-        event.end_time = request.POST.get('end_time')
-        event.max_capacity = request.POST.get('max_capacity')
-        
-        # Save the updated event
-        event.save()
-        
-        # Add a success message
-        messages.success(request, "Event updated successfully!")
-        
-        # Redirect to event detail page
-        return redirect('event_detail', event_id=event_id)
-    
-    return render(request, 'edit_event.html', {'event': event})
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Event updated successfully!")
+            return redirect('event_detail', event_id=event_id)
+        messages.error(request, "Please correct the errors below.")
+    else:
+        form = EventForm(instance=event)
+
+    return render(request, 'edit_event.html', {'event': event, 'form': form})
+
 
 def ticket_detail(request, ticket_id):
-    ticket = get_object_or_404(Ticket, pk=ticket_id)
+    ticket = get_object_or_404(Ticket, ticket_id=ticket_id)
     return render(request, 'ticket_detail.html', {'ticket': ticket})
-
-
-def event_list(request):
-    events = Event.objects.all()
-    return render(request, 'event_list.html', {'events': events})

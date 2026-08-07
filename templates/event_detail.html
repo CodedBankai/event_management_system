@@ -61,12 +61,18 @@
                 <div class="col-md-4">
                     <div class="action-card">
                         <h4 class="action-title">Event Actions</h4>
-                        <a href="{% url 'register_event' event.event_id %}" class="action-btn register-btn">
-                            <i class="fas fa-ticket-alt"></i> Register Now
-                        </a>
+                        {% if event.max_capacity and event.ticket_set.count >= event.max_capacity %}
+                            <button class="action-btn register-btn" disabled style="background-color: #6c757d; cursor: not-allowed;">
+                                <i class="fas fa-ban"></i> Event Full
+                            </button>
+                        {% else %}
+                            <a href="{% url 'register_event' event.event_id %}" class="action-btn register-btn">
+                                <i class="fas fa-ticket-alt"></i> Register Now
+                            </a>
+                        {% endif %}
                         {% if user.is_staff %}
                         <div class="admin-actions">
-                            <a href="/events/{{ event.event_id }}/edit/" class="action-btn edit-btn">
+                            <a href="{% url 'edit_event' event.event_id %}" class="action-btn edit-btn">
                                 <i class="fas fa-edit"></i> Edit Event
                             </a>
                             <a href="{% url 'delete_event' event.event_id %}" class="action-btn delete-btn">
