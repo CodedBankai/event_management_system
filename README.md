@@ -2,6 +2,8 @@
 
 A web-based **Event Management System** built using the **Django Framework** that simplifies event organization, registration, and attendee management. The application provides separate dashboards for administrators and users, making event management efficient and user-friendly.
 
+**🔗 Live Demo:** [https://event-management-system-rlga.onrender.com/](https://event-management-system-rlga.onrender.com/)
+
 ---
 
 ## 📖 Overview
@@ -34,7 +36,7 @@ The Event Management System (EMS) is designed to provide a centralized platform 
 |------------|-------------|
 | **Backend** | Django (Python) |
 | **Frontend** | HTML5, CSS3, JavaScript, Bootstrap |
-| **Database** | MySQL |
+| **Database** | PostgreSQL |
 | **Authentication** | Django Authentication System |
 
 ---
